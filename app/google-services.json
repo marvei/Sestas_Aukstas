@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "421763726887",
+    "firebase_url": "https://ework-59259.firebaseio.com",
+    "project_id": "ework-59259",
+    "storage_bucket": "ework-59259.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:421763726887:android:05c02f44793069c2",
+        "android_client_info": {
+          "package_name": "com.example.sestas_aukstas.ework"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "421763726887-fb8jj9mla6d8gjec28eujvfu9t9lcope.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBZCDNgEGWjuxYaawqCNsdaEtzerLYztB8"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

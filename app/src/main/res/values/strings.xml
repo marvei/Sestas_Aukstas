@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">eWORK</string>
+    <string name="loginText">Prisijungti</string>
+    <string name="passText">Slaptažodis</string>
+    <string name="emailText">El. pašto adresas</string>
+    <string name="unregText">Neturite paskyros? Spauskite čia!</string>
+    <string name="goBack">Grįžti</string>
+</resources>
