@@ -7,12 +7,15 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
     TextView tvRegister;
-    EditText txMail;
-    EditText txPass;
+    EditText usrMail;
+    EditText usrPass;
     Button btnLogin;
+    private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,17 +28,25 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     }
 
     public void initializeObj() {
-        txMail = findViewById(R.id.txMail);
-        txPass = findViewById(R.id.txPass);
+        usrMail = findViewById(R.id.usrMail);
+        usrPass = findViewById(R.id.usrPass);
         btnLogin = findViewById(R.id.btnLogin);
         tvRegister = findViewById(R.id.tvRegister);
-        //firebaseObj = FirebaseAuth.getInstance();
     }
 
     @Override
     public void onClick(View v) {
         if (v == tvRegister) {
+            //einama į registracijos langą
             startActivity(new Intent(this, RegisterActivity.class));
         }
     }
+
+   /* @Override
+    public void onStart() {
+        super.onStart();
+        // Check if user is signed in (non-null) and update UI accordingly.
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        updateUI(currentUser);
+    }*/
 }
