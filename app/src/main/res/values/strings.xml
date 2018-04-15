@@ -19,4 +19,11 @@
     <string name="myProfile">Mano profilis</string>
     <string name="settings">Nustatymai</string>
     <string name="logout">Atsijungti</string>
+
+    //profile_page
+    <string name="profileLogout">Atsijungti</string>
+    <string name="profileName">Vardas Pavardė</string>
+    <string name="profileMail">E. Paštas</string>
+    <string name="profileWorkStat">&#032;Darbas</string>
+    <string name="profileDesc">Profilio nuotrauka</string>
 </resources>
