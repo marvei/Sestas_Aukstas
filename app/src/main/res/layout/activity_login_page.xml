@@ -18,7 +18,7 @@
         app:layout_constraintTop_toTopOf="@+id/guideline2" />
 
     <EditText
-        android:id="@+id/txMail"
+        android:id="@+id/usrMail"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
@@ -52,7 +52,7 @@
         app:layout_constraintGuide_begin="64dp" />
 
     <EditText
-        android:id="@+id/txPass"
+        android:id="@+id/usrPass"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
@@ -62,7 +62,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/txMail" />
+        app:layout_constraintTop_toBottomOf="@+id/usrMail" />
 
     <TextView
         android:id="@+id/tvRegister"
@@ -70,6 +70,7 @@
         android:layout_height="23dp"
         android:layout_marginTop="8dp"
         android:onClick="registerButtonPressed"
+        android:gravity="center"
         android:text="@string/unregText"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
