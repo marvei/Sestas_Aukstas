@@ -8,11 +8,14 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 /**
- * Created by Enpoz on 4/15/2018.
+ * Created by Tadas on 4/15/2018.
+ * Modified by Tadas on 4/15/2018
  */
 
 public class ProfileActivity extends AppCompatActivity implements View.OnClickListener{
@@ -21,11 +24,12 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
     Button btnLogout;
     Button btnWorkStat;
     ImageView ivProfilePic;
+    FirebaseAuth firebaseObj;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login_page);
+        setContentView(R.layout.profile_page);
         initializeObj();
         btnLogout.setOnClickListener(this);
         btnWorkStat.setOnClickListener(this);
@@ -43,9 +47,12 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
     public void onClick(View v) {
         if (v == btnLogout) {
             //einama į prisijungimo langą
+            //    finish();
+            //    firebaseObj.signOut();
+            Toast.makeText(ProfileActivity.this, "Sėkmingai atsijungta", Toast.LENGTH_SHORT).show();
             startActivity(new Intent(this, LoginActivity.class));
         }
-        if(v== btnWorkStat)
+        if(v == btnWorkStat)
         {
             startActivity(new Intent(this, WorkActivity.class));
         }
