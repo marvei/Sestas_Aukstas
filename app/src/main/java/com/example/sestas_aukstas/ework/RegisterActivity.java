@@ -15,6 +15,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 public class RegisterActivity extends AppCompatActivity {
@@ -27,6 +28,7 @@ public class RegisterActivity extends AppCompatActivity {
     DatabaseReference mUserName = mUserRef.child("Name");
     DatabaseReference mEmailName = mUserRef.child("Email");
     DatabaseReference mPasswordName = mUserRef.child("Password"); */
+
 
 
    // private ProgressDialog progressDialog;
@@ -68,6 +70,7 @@ public class RegisterActivity extends AppCompatActivity {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if (task.isSuccessful()) {
+                                updateDatabase();
                                 pd.dismiss();
                                 finish();
                                 startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
@@ -153,6 +156,35 @@ public class RegisterActivity extends AppCompatActivity {
                 Toast.makeText(RegisterActivity.this, "Duomenų bazės klaida", Toast.LENGTH_SHORT).show();
             }
         });
+    }*/
+
+    private void updateDatabase(){
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+
+        String currentUser = mAuth.getCurrentUser().getUid();
+
+
+    //    User user = new User(newName.getText().toString(), newMail.getText().toString());
+
+        DatabaseReference ref = database.getReference();
+
+        ref.child("users").child(currentUser).child("vardas").setValue(newName.getText().toString());
+        ref.child("users").child(currentUser).child("email").setValue(newMail.getText().toString());
+
+    }
+
+    /*public class User{
+        public String username;
+        public String email;
+
+        public User(){
+
+        }
+
+        public User(String username, String email){
+            this.username = username;
+            this.email = email;
+        }
     }*/
 
 }
