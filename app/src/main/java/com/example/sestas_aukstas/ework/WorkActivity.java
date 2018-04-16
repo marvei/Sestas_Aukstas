@@ -10,9 +10,13 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.FirebaseApiNotAvailableException;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -39,8 +43,8 @@ public class WorkActivity extends AppCompatActivity implements View.OnClickListe
     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     SimpleDateFormat timeFormat = new SimpleDateFormat("hh:mm:ss");
     long totalWorkTime = 0;
-    private FirebaseAuth mAuth;
-    private FirebaseDatabase firebaseDatabase;
+    private FirebaseAuth mAuth = FirebaseAuth.getInstance();
+    private FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
     int intervalNumber = 1;
 
     @Override
@@ -70,6 +74,7 @@ public class WorkActivity extends AppCompatActivity implements View.OnClickListe
 
     public void onClick(View v) {
         if (v == btnWork) {
+
             if(workStarted == false)
             {
                 workStarted = true;
@@ -77,6 +82,8 @@ public class WorkActivity extends AppCompatActivity implements View.OnClickListe
                 String datetostr = workDateFormat.format(workTimeStart);
                 String workDate = dateFormat.format(workTimeStart);
                 String workTime = timeFormat.format(workTimeStart);
+               // getCounterIfDateExists(workDate);
+               // resetCounterIfNewDate(workDate);
                 storeDataToDatabase(workDate, workTime, "start");
                 Log.d("start = ", datetostr);
                 tvStart.setText(datetostr);
@@ -91,6 +98,8 @@ public class WorkActivity extends AppCompatActivity implements View.OnClickListe
                 workTimeStop = new Date();
                 String workDate = dateFormat.format(workTimeStop);
                 String workTime = timeFormat.format(workTimeStop);
+               // getCounterIfDateExists(workDate);
+               // resetCounterIfNewDate(workDate);
                 tvStop.setText(workDateFormat.format(workTimeStop));
                 storeDataToDatabase(workDate, workTime, "stop");
                 Log.d("stop = ", workDateFormat.format(workTimeStop));
@@ -108,19 +117,25 @@ public class WorkActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     public void storeDataToDatabase(String date, String time, String caseOf){
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        mAuth = FirebaseAuth.getInstance();
+      //  FirebaseDatabase database = FirebaseDatabase.getInstance();
+     //   mAuth = FirebaseAuth.getInstance();
         String currentUser = mAuth.getCurrentUser().getUid();
 
-        DatabaseReference ref = database.getReference();
+        DatabaseReference ref = firebaseDatabase.getReference();
+        //resetIntervalCounter(date, currentUser, ref);
+
+       // intervalNumber = setIntervalCounter(date, currentUser, ref);
 
         switch(caseOf){
             case "start" :
                 ref.child("users").child(currentUser).child("time_stamps").child(date.toString()).child(Integer.toString(intervalNumber)).child("Start").setValue(time);
+                ref.child("users").child(currentUser).child("time_stamps").child(date.toString()).child("interval_counter").setValue(intervalNumber);
                 break;
             case "stop" :
                 ref.child("users").child(currentUser).child("time_stamps").child(date.toString()).child(Integer.toString(intervalNumber)).child("Stop").setValue(time);
                 intervalNumber++;
+                ref.child("users").child(currentUser).child("time_stamps").child(date.toString()).child("interval_counter").setValue(intervalNumber);
+               // intervalNumber++;
                 break;
             case "total" :
                 ref.child("users").child(currentUser).child("time_stamps").child(date.toString()).child("Total today").setValue(time);
@@ -129,6 +144,127 @@ public class WorkActivity extends AppCompatActivity implements View.OnClickListe
                 Toast.makeText(WorkActivity.this, "Įvyko klaida", Toast.LENGTH_SHORT).show();
         }
     }
+
+    /*private void checkIfDateExists(String date){
+        DatabaseReference ref = firebaseDatabase.getReference();
+        DatabaseReference child = ref.child("user").child(mAuth.getCurrentUser().getUid()).child("time_stamps");
+        child.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+    }*/
+
+    private void resetCounterIfNewDate(String date){
+     //   FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference ref = firebaseDatabase.getReference();
+        DatabaseReference child = ref.child("user").child(mAuth.getCurrentUser().getUid()).child("time_stamps");
+        final String finalDate = date;
+        Log.d("finaldate = ", finalDate);
+        Log.d("date = ", date);
+        child.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (!dataSnapshot.hasChild(finalDate)){
+                    Log.d("nera datos = ", Boolean.toString(!dataSnapshot.hasChild(finalDate)));
+                    intervalNumber = 1;
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.w("error ", databaseError.toException());
+            }
+        });
+    }
+
+    private void getCounterIfDateExists(String date){
+        DatabaseReference ref = firebaseDatabase.getReference();
+        final DatabaseReference child = ref.child("user").child(mAuth.getCurrentUser().getUid()).child("time_stamps");
+        final String finalDate = date;
+        child.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.hasChild(finalDate)){
+                    DatabaseReference counterRef = child.child(finalDate);
+                    counterRef.addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            intervalNumber = dataSnapshot.getValue(Integer.class);
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+                            Log.w("error", databaseError.toException());
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.w("error", databaseError.toException());
+            }
+        });
+    }
+
+    /*private Integer setIntervalCounter(String date, String user, DatabaseReference reference) {
+        reference = reference.child("users").child(user).child("time_stamps");
+        final DatabaseReference finalReference = reference;
+        final String finalDate = date;
+        Log.d("final date - ", finalDate);
+        reference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.hasChild(finalDate)){
+                    DatabaseReference dateRef = finalReference.child(finalDate).child("interval_counter");
+                    dateRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            intervalNumber = dataSnapshot.getValue(Integer.class);
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+                            Log.d("counter - ", Integer.toString(intervalNumber));
+                        }
+                    });
+                } else {
+                    intervalNumber = 1;
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.d("Same date - ", finalDate);
+            }
+        });
+        return intervalNumber;
+    }*/
+
+    /*private void resetIntervalCounter(final String date, String user, DatabaseReference reference) {
+        reference = reference.child("users").child(user).child("time_stamps");
+        reference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (!dataSnapshot.hasChild(date)){
+                    intervalNumber = 1;
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.d("Same date - ", date);
+            }
+        });
+    }*/
 
 
     public void totalTimePrint(){
