@@ -42,7 +42,7 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
         initializeObj();
         btnLogout.setOnClickListener(this);
         btnWorkStat.setOnClickListener(this);
-
+        //y u no work
     }
 
     public void showUserName(FirebaseUser currentUser){
