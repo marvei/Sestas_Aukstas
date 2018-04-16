@@ -24,12 +24,14 @@ public class WorkActivity extends AppCompatActivity implements View.OnClickListe
     TextView tvStart;
     TextView tvStop;
     TextView tvTotal;
+    TextView tvWorkTimeToday;
+    TextView tvToday;
     Button btnWork;
     Date workTimeStart;
     Date workTimeStop;
     Boolean workStarted = false;
     SimpleDateFormat workDateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-  //  long totalWorkTime = 0;
+    long totalWorkTime = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +50,8 @@ public class WorkActivity extends AppCompatActivity implements View.OnClickListe
         tvStart = findViewById(R.id.tvStart);
         tvStop = findViewById(R.id.tvStop);
         tvTotal = findViewById(R.id.tvTotal);
+        tvWorkTimeToday = findViewById(R.id.tvWorkTimeToday);
+        tvToday = findViewById(R.id.tvToday);
     }
 
 
@@ -75,7 +79,8 @@ public class WorkActivity extends AppCompatActivity implements View.OnClickListe
                 btnWork.setText(R.string.workStart);
                 btnWork.setBackgroundColor(Color.GREEN);
                 Toast.makeText(WorkActivity.this, "Darbas baigtas.", Toast.LENGTH_SHORT).show();
-                totalTime();
+
+                totalTimeToday();
             }
 
 
@@ -84,17 +89,25 @@ public class WorkActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
-    public void totalTime(){
-        //milliseconds
-        long different = workTimeStop.getTime() - workTimeStart.getTime();
-       // totalWorkTime+=different;
-
-        long elapsedSeconds = different / 1000 % 60;
-        long elapsedMinutes = different / (60 * 1000) % 60;
-        long elapsedHours = different / (60 * 60 * 1000) % 24;
-
-
+    public void totalTimePrint(){
+        long elapsedSeconds = totalWorkTime / 1000 % 60;
+        long elapsedMinutes = totalWorkTime / (60 * 1000) % 60;
+        long elapsedHours = totalWorkTime / (60 * 60 * 1000) % 24;
         tvTotal.setText(elapsedHours + " valandų, " + elapsedMinutes + " minučių, " + elapsedSeconds + " sekundžių.");
+    }
+
+    public void totalTimeToday(){
+        //milliseconds
+        long difference = workTimeStop.getTime() - workTimeStart.getTime();
+        totalWorkTime+=difference;
+        totalTimePrint();
+
+        long elapsedSeconds = difference / 1000 % 60;
+        long elapsedMinutes = difference / (60 * 1000) % 60;
+        long elapsedHours = difference / (60 * 60 * 1000) % 24;
+
+
+        tvToday.setText(elapsedHours + " valandų, " + elapsedMinutes + " minučių, " + elapsedSeconds + " sekundžių.");
 
     }
 }
