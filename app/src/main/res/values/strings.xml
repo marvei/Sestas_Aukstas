@@ -1,8 +1,37 @@
 <resources>
+    //Name
     <string name="app_name">eWORK</string>
+
+    //activity_login page
     <string name="loginText">Prisijungti</string>
     <string name="passText">Slaptažodis</string>
     <string name="emailText">El. pašto adresas</string>
     <string name="unregText">Neturite paskyros? Spauskite čia!</string>
+
+    //activity_register_page
     <string name="goBack">Grįžti</string>
+    <string name="pass2Text">Pakartokite slaptažodį</string>
+    <string name="signedText">Turite paskyrą? Prisijunkite!</string>
+    <string name="signInText">Registruotis</string>
+    <string name="regName">Vardas</string>
+
+    //navigatio_menu
+    <string name="myProfile">Mano profilis</string>
+    <string name="settings">Nustatymai</string>
+    <string name="logout">Atsijungti</string>
+
+    //profile_page
+    <string name="profileLogout">Atsijungti</string>
+    <string name="profileName">Vardas Pavardė</string>
+    <string name="profileMail">E. Paštas</string>
+    <string name="profileWorkStat">&#032;Darbas</string>
+    <string name="profileDesc">Profilio nuotrauka</string>
+
+    //activity_work_page
+    <string name="workStart">Pradėti darbą</string>
+    <string name="workStop">Baigti darbą</string>
+    <string name="workTimeStarted">Darbas pradėtas: </string>
+    <string name="workTimeStopped">Darbas baigtas: </string>
+    <string name="workTimeTotal">Iš viso dirbta: </string>
+    <string name="workTimeToday">Šiandien dirbta: </string>
 </resources>

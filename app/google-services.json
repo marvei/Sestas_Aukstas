@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "421763726887-iqh8tbpvn7c58d4n2nge5lv4mn8ci3dd.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.sestas_aukstas.ework",
+            "certificate_hash": "3aeca5c46a56135881d01cd65dac13b4cb173d77"
+          }
+        },
+        {
           "client_id": "421763726887-fb8jj9mla6d8gjec28eujvfu9t9lcope.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -29,8 +37,13 @@
           "status": 1
         },
         "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "421763726887-fb8jj9mla6d8gjec28eujvfu9t9lcope.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         },
         "ads_service": {
           "status": 2
