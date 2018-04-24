@@ -42,4 +42,7 @@
     <string name="profileEmailUpdate">El. Paštas</string>
     <string name="profileUpdateHeader">Porfilio redagavimas</string>
 
+    //error text
+    <string name="emptyFieldMsg">Laukelis negali būti tūščias.</string>
+
 </resources>

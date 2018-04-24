@@ -46,7 +46,7 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
     }
 
     public void showUserName(FirebaseUser currentUser){
-        firebaseObj = firebaseObj = FirebaseAuth.getInstance();
+        firebaseObj = FirebaseAuth.getInstance();
         String currentUserId = currentUser.getUid();
         Log.d("current user - ", currentUserId);
         database = FirebaseDatabase.getInstance();

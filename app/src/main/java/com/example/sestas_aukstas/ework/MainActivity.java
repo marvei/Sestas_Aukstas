@@ -91,7 +91,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     public void goToSettings(){
-        startActivity(new Intent(MainActivity.this, ProfileActivity.class)); //create settings activity!!!!!!
+        startActivity(new Intent(MainActivity.this, ProfileSettingsActivity.class)); //create settings activity!!!!!!
     }
 
     public void logOut(){
