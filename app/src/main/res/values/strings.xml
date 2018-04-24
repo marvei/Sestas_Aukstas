@@ -17,6 +17,7 @@
 
     //navigatio_menu
     <string name="myProfile">Mano profilis</string>
+    <string name="darbas">Darbas</string>
     <string name="settings">Nustatymai</string>
     <string name="logout">Atsijungti</string>
 
