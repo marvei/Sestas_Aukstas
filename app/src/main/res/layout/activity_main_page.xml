@@ -26,7 +26,9 @@
             android:gravity="center_vertical"
             android:text="@string/myProfile" />
 
-        <View style="@style/Divider" />
+        <View
+            android:id="@+id/nav_acc_divider"
+            style="@style/Divider" />
 
         <TextView
             android:id="@+id/nav_work"
@@ -35,7 +37,9 @@
             android:gravity="center_vertical"
             android:text="@string/darbas" />
 
-        <View style="@style/Divider" />
+        <View
+            android:id="@+id/nav_work_divider"
+            style="@style/Divider" />
 
         <TextView
             android:id="@+id/nav_settings"
@@ -44,7 +48,9 @@
             android:gravity="center_vertical"
             android:text="@string/settings" />
 
-        <View style="@style/Divider" />
+        <View
+            android:id="@+id/nav_settings_divider"
+            style="@style/Divider" />
 
         <TextView
             android:id="@+id/nav_logout"
@@ -53,7 +59,9 @@
             android:gravity="center_vertical"
             android:text="@string/logout" />
 
-        <View style="@style/Divider" />
+        <View
+            android:id="@+id/nav_logout_divider"
+            style="@style/Divider" />
     </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>
