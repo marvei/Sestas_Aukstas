@@ -35,4 +35,11 @@
     <string name="workTimeStopped">Darbas baigtas: </string>
     <string name="workTimeTotal">Iš viso dirbta: </string>
     <string name="workTimeToday">Šiandien dirbta: </string>
+
+    //activity_profile_settings
+    <string name="profileSave">Išsaugoti</string>
+    <string name="profileNameUpdate">Vardas</string>
+    <string name="profileEmailUpdate">El. Paštas</string>
+    <string name="profileUpdateHeader">Porfilio redagavimas</string>
+
 </resources>
