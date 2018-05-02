@@ -17,6 +17,7 @@
 
     //navigatio_menu
     <string name="myProfile">Mano profilis</string>
+    <string name="darbas">Darbas</string>
     <string name="settings">Nustatymai</string>
     <string name="logout">Atsijungti</string>
 
@@ -34,4 +35,14 @@
     <string name="workTimeStopped">Darbas baigtas: </string>
     <string name="workTimeTotal">Iš viso dirbta: </string>
     <string name="workTimeToday">Šiandien dirbta: </string>
+
+    //activity_profile_settings
+    <string name="profileSave">Išsaugoti</string>
+    <string name="profileNameUpdate">Vardas</string>
+    <string name="profileEmailUpdate">El. Paštas</string>
+    <string name="profileUpdateHeader">Porfilio redagavimas</string>
+
+    //error text
+    <string name="emptyFieldMsg">Laukelis negali būti tūščias.</string>
+
 </resources>
