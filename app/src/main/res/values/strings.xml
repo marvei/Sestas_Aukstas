@@ -43,6 +43,11 @@
     <string name="profileEmailUpdate">El. Paštas</string>
     <string name="profileUpdateHeader">Porfilio redagavimas</string>
 
+    //activity_map
+    <string name="inBounds">Ribose</string>
+    <string name="notInBounds">Už ribų</string>
+
+
     //error text
     <string name="emptyFieldMsg">Laukelis negali būti tūščias.</string>
 
