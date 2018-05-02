@@ -131,7 +131,7 @@ public class MapActivity extends AppCompatActivity implements
                 Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
-        this.locationManager.requestLocationUpdates(this.locationProvider, 5000, 5, this);
+        this.locationManager.requestLocationUpdates(this.locationProvider, 10000, 1, this);
 
     }
 
@@ -144,34 +144,7 @@ public class MapActivity extends AppCompatActivity implements
 
         this.locationManager.removeUpdates(this);
     }
-
-    private void getDeviceLocation() {
-        Log.d(TAG, "getDeviceLocation: getting the current location");
-
-        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
-
-        try {
-            if (mLocationPermissionsGranted) {
-                Task location = mFusedLocationProviderClient.getLastLocation();
-                location.addOnCompleteListener(new OnCompleteListener() {
-                    @Override
-                    public void onComplete(@NonNull Task task) {
-                        if (task.isSuccessful()) {
-                            Log.d(TAG, "onComplete: found location!");
-                            currentLocation = (Location) task.getResult();
-                            checkIfCurrentLocationInBounds();
-
-                        } else {
-                            Log.d(TAG, "onComplete: current location is null");
-                            Toast.makeText(MapActivity.this, "Negalima gauti dabartinės vietos.", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
-            }
-        } catch (SecurityException e) {
-            Log.e(TAG, "getDeviceLocation: SecurityException: " + e.getMessage());
-        }
-    }
+    
 
     public boolean pointInPolygon(LatLng point, Polygon polygon) {
         // ray casting alogrithm http://rosettacode.org/wiki/Ray-casting_algorithm
@@ -239,7 +212,8 @@ public class MapActivity extends AppCompatActivity implements
     }
 
 
-    private void checkIfCurrentLocationInBounds() {
+    public void checkIfCurrentLocationInBounds() {
+        Log.i("called", "checking");
         if(currentLocation != null && mMap != null) {
             LatLng point = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
             Polygon polygon = mMap.addPolygon(new PolygonOptions()
@@ -250,11 +224,14 @@ public class MapActivity extends AppCompatActivity implements
                             new LatLng(54.905670, 23.966252)));
             if (pointInPolygon(point, polygon)) {
                 map_status.setText(R.string.inBounds);
+                Log.i("called", "done checking");
             } else {
                 map_status.setText(R.string.notInBounds);
+                Log.i("called", "done checking");
+
             }
         }
-        else{getDeviceLocation();}
+        //else{getDeviceLocation();}
     }
 
     private void initMap() {
@@ -277,7 +254,7 @@ public class MapActivity extends AppCompatActivity implements
         mMap = googleMap;
 
         if (mLocationPermissionsGranted) {
-            getDeviceLocation();
+            //getDeviceLocation();
 
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                     != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this,
@@ -395,26 +372,28 @@ public class MapActivity extends AppCompatActivity implements
                 Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
-        Location location = locationManager.getLastKnownLocation(locationProvider);
 
+        Location location = locationManager.getLastKnownLocation(locationProvider);
 
         //initialize the location
         if(location != null) {
-            //currentLocation = location;
-            //checkIfCurrentLocationInBounds();
             onLocationChanged(location);
         }
     }
 
     @Override
     public void onLocationChanged(Location location) {
-        getDeviceLocation();
+        Log.i("called", "changing location");
+        currentLocation = location;
+        checkIfCurrentLocationInBounds();
         Log.i("called", "onLocationChanged");
     }
 
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
-        getDeviceLocation();
+        //checkIfCurrentLocationInBounds();
+        //getDeviceLocation();
+        checkIfCurrentLocationInBounds();
         Log.i("called", "onStatusChanged");
     }
 
