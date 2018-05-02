@@ -81,7 +81,6 @@ public class ProfileSettingsActivity extends AppCompatActivity implements View.O
     }
 
     public void saveChanges(FirebaseUser currentUser) {
-        changesSuccessful = false;
         if (noEmptyFields()) {
             String name = newName.getText().toString();
             DatabaseReference myRef = database.getReference().child("users").child(currentUser.getUid()).child("vardas");
