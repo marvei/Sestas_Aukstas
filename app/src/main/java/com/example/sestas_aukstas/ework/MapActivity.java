@@ -1,9 +1,15 @@
 package com.example.sestas_aukstas.ework;
 
+import android.content.pm.PackageManager;
+import android.nfc.Tag;
 import android.os.Bundle;
+import android.Manifest;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.widget.Toast;
-
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -21,17 +27,18 @@ import java.util.List;
 
 public class MapActivity extends AppCompatActivity implements
         OnMapReadyCallback,
-        GoogleMap.OnPolygonClickListener{
+        GoogleMap.OnPolygonClickListener {
 
-    private static final int COLOR_BLACK_ARGB = 0xff000000;
-    private static final int COLOR_WHITE_ARGB = 0xffffffff;
+    private GoogleMap mMap;
+    private static final String TAG = "MapActivity";
+    private static final String FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
+    private static final String COARSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
+    private Boolean mLocationPermissionsGranted = false;
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
+
     private static final int COLOR_GREEN_ARGB = 0xff388E3C;
     private static final int COLOR_PURPLE_ARGB = 0xff81C784;
-    private static final int COLOR_ORANGE_ARGB = 0xffF57F17;
-    private static final int COLOR_BLUE_ARGB = 0xffF9A825;
-
-    private static final int POLYLINE_STROKE_WIDTH_PX = 12;
-    private static final int POLYGON_STROKE_WIDTH_PX = 8;
+    private static final int POLYGON_STROKE_WIDTH_PX = 5;
     private static final int PATTERN_DASH_LENGTH_PX = 20;
     private static final int PATTERN_GAP_LENGTH_PX = 20;
     private static final PatternItem DOT = new Dot();
@@ -51,14 +58,16 @@ public class MapActivity extends AppCompatActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        // Retrieve the content view that renders the map.
         setContentView(R.layout.activity_map);
+        getLocationPermission();
+    }
 
+    public void initMap(){
+        Log.d(TAG, "initMap: initializing map");
         // Get the SupportMapFragment and request notification when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
+        mapFragment.getMapAsync(MapActivity.this);
     }
 
     /**
@@ -69,9 +78,11 @@ public class MapActivity extends AppCompatActivity implements
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
+        Log.d(TAG,"onMapReady: map is ready");
+        mMap = googleMap;
 
         // Add polygons to indicate areas on the map.
-        Polygon polygon1 = googleMap.addPolygon(new PolygonOptions()
+        Polygon polygon = googleMap.addPolygon(new PolygonOptions()
                 .clickable(true)
                 .add(
                         new LatLng(54.905632, 23.965836),
@@ -79,14 +90,14 @@ public class MapActivity extends AppCompatActivity implements
                         new LatLng(54.905887, 23.966082),
                         new LatLng(54.905670, 23.966252)));
         // Store a data object with the polygon, used here to indicate an arbitrary type.
-        polygon1.setTag("alpha");
+        polygon.setTag("workArea");
         // Style the polygon.
-        stylePolygon(polygon1);
+        stylePolygon(polygon);
 
 
         // Position the map's camera near Alice Springs in the center of Australia,
         // and set the zoom factor so most of Australia shows on the screen.
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(54.905759, 23.965989), 19));
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(54.905759, 23.965989), 18));
 
 
         // Set listeners for click events.
@@ -124,5 +135,43 @@ public class MapActivity extends AppCompatActivity implements
         Toast.makeText(this, "Area type " + polygon.getTag().toString(), Toast.LENGTH_SHORT).show();
     }
 
+    private void getLocationPermission(){
+        Log.d(TAG, "getLocationPermission: getting location permissions");
+        String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION};
+        if(ContextCompat.checkSelfPermission(this.getApplicationContext(),
+                FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
+            if(ContextCompat.checkSelfPermission(this.getApplicationContext(),
+                    COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED){
+                mLocationPermissionsGranted = true;
+            }else{
+                ActivityCompat.requestPermissions(this,permissions, LOCATION_PERMISSION_REQUEST_CODE);
+            }
+        }else{
+            ActivityCompat.requestPermissions(this,permissions, LOCATION_PERMISSION_REQUEST_CODE);
+        }
+    }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        Log.d(TAG, "onRequestPermissionsResult: called.");
+        mLocationPermissionsGranted = false;
+
+        switch(requestCode){
+            case LOCATION_PERMISSION_REQUEST_CODE:{
+                if(grantResults.length > 0){
+                    for (int i = 0; i < grantResults.length; i++){
+                        if(grantResults[i] != PackageManager.PERMISSION_GRANTED){
+                            mLocationPermissionsGranted = false;
+                            Log.d(TAG, "onRequestPermissionsResult: premission failed");
+                            return;
+                        }
+                    }
+                    Log.d(TAG, "onRequestPermissionsResult: premission granted");
+                    mLocationPermissionsGranted = true;
+                    initMap();
+                }
+            }
+        }
+    }
 }
