@@ -1,6 +1,9 @@
 package com.example.sestas_aukstas.ework;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
@@ -9,6 +12,7 @@ import android.location.LocationManager;
 import android.nfc.Tag;
 import android.os.Bundle;
 import android.Manifest;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -39,6 +43,8 @@ import com.google.android.gms.tasks.Task;
 import java.util.Arrays;
 import java.util.List;
 
+import static java.lang.Thread.sleep;
+
 public class MapActivity extends AppCompatActivity implements
         OnMapReadyCallback,
         GoogleMap.OnPolygonClickListener,
@@ -53,7 +59,7 @@ public class MapActivity extends AppCompatActivity implements
     private static final String COARSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
     private Boolean mLocationPermissionsGranted = false;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
-    private Location currentLocation;
+    private Location currentLocation = null;
     private static final int COLOR_GREEN_ARGB = 0xff388E3C;
     private static final int COLOR_PURPLE_ARGB = 0xff81C784;
     private static final int POLYGON_STROKE_WIDTH_PX = 5;
@@ -62,6 +68,7 @@ public class MapActivity extends AppCompatActivity implements
     private static final PatternItem DASH = new Dash(PATTERN_DASH_LENGTH_PX);
     private static final PatternItem GAP = new Gap(PATTERN_GAP_LENGTH_PX);
     TextView map_status;
+    Context context = this;
 
 
     // Create a stroke pattern of a gap followed by a dash.
@@ -69,11 +76,47 @@ public class MapActivity extends AppCompatActivity implements
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        checkLocationServices();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
         map_status = findViewById(R.id.map_status);
         getLocationPermission();
         this.initializeLocationManager();
+    }
+
+    private void checkLocationServices(){
+        LocationManager lm = (LocationManager)context.getSystemService(Context.LOCATION_SERVICE);
+        boolean gps_enabled = false;
+        boolean network_enabled = false;
+
+        try {
+            gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        } catch(Exception ex) {}
+
+        try {
+            network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+        } catch(Exception ex) {}
+
+        if(!gps_enabled && !network_enabled) {
+            // notify user
+            AlertDialog.Builder dialog = new AlertDialog.Builder(context);
+            dialog.setMessage(context.getResources().getString(R.string.gps_network_not_enabled));
+            dialog.setPositiveButton(context.getResources().getString(R.string.open_location_settings), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                    Intent myIntent = new Intent( Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                    context.startActivity(myIntent);
+                }
+            });
+            dialog.setNegativeButton(context.getString(R.string.Cancel), new DialogInterface.OnClickListener() {
+
+                @Override
+                public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                    startActivity(new Intent(MapActivity.this, MainActivity.class));
+                }
+            });
+            dialog.show();
+        }
     }
 
     @Override
@@ -88,7 +131,8 @@ public class MapActivity extends AppCompatActivity implements
                 Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
-        this.locationManager.requestLocationUpdates(this.locationProvider, 400, 1, this);
+        this.locationManager.requestLocationUpdates(this.locationProvider, 5000, 5, this);
+
     }
 
     @Override
@@ -196,19 +240,21 @@ public class MapActivity extends AppCompatActivity implements
 
 
     private void checkIfCurrentLocationInBounds() {
-        LatLng point = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
-        Polygon polygon = mMap.addPolygon(new PolygonOptions()
-                .add(
-                        new LatLng(54.905632, 23.965836),
-                        new LatLng(54.905882, 23.965836),
-                        new LatLng(54.905887, 23.966082),
-                        new LatLng(54.905670, 23.966252)));
-        if (pointInPolygon(point, polygon)) {
-            map_status.setText(R.string.inBounds);
-        } else {
-            map_status.setText(R.string.notInBounds);
+        if(currentLocation != null && mMap != null) {
+            LatLng point = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
+            Polygon polygon = mMap.addPolygon(new PolygonOptions()
+                    .add(
+                            new LatLng(54.905632, 23.965836),
+                            new LatLng(54.905882, 23.965836),
+                            new LatLng(54.905887, 23.966082),
+                            new LatLng(54.905670, 23.966252)));
+            if (pointInPolygon(point, polygon)) {
+                map_status.setText(R.string.inBounds);
+            } else {
+                map_status.setText(R.string.notInBounds);
+            }
         }
-
+        else{getDeviceLocation();}
     }
 
     private void initMap() {
@@ -354,7 +400,8 @@ public class MapActivity extends AppCompatActivity implements
 
         //initialize the location
         if(location != null) {
-
+            //currentLocation = location;
+            //checkIfCurrentLocationInBounds();
             onLocationChanged(location);
         }
     }
@@ -362,10 +409,12 @@ public class MapActivity extends AppCompatActivity implements
     @Override
     public void onLocationChanged(Location location) {
         getDeviceLocation();
+        Log.i("called", "onLocationChanged");
     }
 
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
+        getDeviceLocation();
         Log.i("called", "onStatusChanged");
     }
 
@@ -377,5 +426,6 @@ public class MapActivity extends AppCompatActivity implements
     @Override
     public void onProviderDisabled(String provider) {
         Log.i("called", "onProviderDisabled");
+        checkLocationServices();
     }
 }

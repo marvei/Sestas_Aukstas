@@ -46,6 +46,10 @@
     //activity_map
     <string name="inBounds">Ribose</string>
     <string name="notInBounds">Už ribų</string>
+    <string name="Cancel">Atšaukti</string>
+    <string name="open_location_settings">Atidaryti nustatymus</string>
+    <string name="gps_network_not_enabled">GPS išjungtas</string>
+
 
 
     //error text
