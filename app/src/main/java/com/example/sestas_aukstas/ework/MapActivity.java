@@ -84,27 +84,29 @@ public class MapActivity extends AppCompatActivity implements
         this.initializeLocationManager();
     }
 
-    private void checkLocationServices(){
-        LocationManager lm = (LocationManager)context.getSystemService(Context.LOCATION_SERVICE);
+    private void checkLocationServices() {
+        LocationManager lm = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
         boolean gps_enabled = false;
         boolean network_enabled = false;
 
         try {
             gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
-        } catch(Exception ex) {}
+        } catch (Exception ex) {
+        }
 
         try {
             network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-        } catch(Exception ex) {}
+        } catch (Exception ex) {
+        }
 
-        if(!gps_enabled && !network_enabled) {
+        if (!gps_enabled && !network_enabled) {
             // notify user
             AlertDialog.Builder dialog = new AlertDialog.Builder(context);
             dialog.setMessage(context.getResources().getString(R.string.gps_network_not_enabled));
             dialog.setPositiveButton(context.getResources().getString(R.string.open_location_settings), new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface paramDialogInterface, int paramInt) {
-                    Intent myIntent = new Intent( Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                    Intent myIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
                     context.startActivity(myIntent);
                 }
             });
@@ -118,33 +120,6 @@ public class MapActivity extends AppCompatActivity implements
             dialog.show();
         }
     }
-
-    @Override
-    protected void onResume() {
-
-        super.onResume();
-
-        Log.i("called", "Activity --> onResume");
-
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return;
-        }
-        this.locationManager.requestLocationUpdates(this.locationProvider, 10000, 1, this);
-
-    }
-
-    @Override
-    protected void onPause() {
-
-        super.onPause();
-
-        Log.i("called", "Activity --> onPause");
-
-        this.locationManager.removeUpdates(this);
-    }
-    
 
     public boolean pointInPolygon(LatLng point, Polygon polygon) {
         // ray casting alogrithm http://rosettacode.org/wiki/Ray-casting_algorithm
@@ -213,6 +188,18 @@ public class MapActivity extends AppCompatActivity implements
 
 
     public void checkIfCurrentLocationInBounds() {
+        //get the location manager
+        this.locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+
+        //define the location manager criteria
+        Criteria criteria = new Criteria();
+
+        this.locationProvider = locationManager.getBestProvider(criteria, false);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        currentLocation = this.locationManager.getLastKnownLocation(locationProvider);
         Log.i("called", "checking");
         if(currentLocation != null && mMap != null) {
             LatLng point = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
@@ -379,6 +366,32 @@ public class MapActivity extends AppCompatActivity implements
         if(location != null) {
             onLocationChanged(location);
         }
+    }
+
+    @Override
+    protected void onResume() {
+
+        super.onResume();
+
+        Log.i("called", "Activity --> onResume");
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        this.locationManager.requestLocationUpdates(this.locationProvider, 400, 2, this);
+
+    }
+
+    @Override
+    protected void onPause() {
+
+        super.onPause();
+
+        Log.i("called", "Activity --> onPause");
+
+        this.locationManager.removeUpdates(this);
     }
 
     @Override
