@@ -9,6 +9,7 @@ import android.net.NetworkInfo;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -48,14 +49,16 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     public boolean isServicesOK(){
         int available = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this);
         if(available == ConnectionResult.SUCCESS){
+            Log.d("LoginActivity", "isServicesOK: Google Play Services are working");
             return true;
         }
         else if(GoogleApiAvailability.getInstance().isUserResolvableError(available)){
+            Log.d("LoginActivity", "isServicesOK: an error occured but we can fix it");
             Dialog dialog = GoogleApiAvailability.getInstance().getErrorDialog(this, available, ERROR_DIALOG_REQUEST);
             dialog.show();
         }
         else{
-            Toast.makeText(LoginActivity.this, "Google Services versija persena.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(LoginActivity.this, "Google Services are too old.", Toast.LENGTH_SHORT).show();
         }
         return false;
     }

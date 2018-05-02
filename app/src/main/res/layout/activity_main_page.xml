@@ -8,11 +8,12 @@
     <LinearLayout
         android:id="@+id/mainmenu"
         android:layout_width="292dp"
-        android:layout_height="154dp"
+        android:layout_height="wrap_content"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
-        android:orientation="vertical"
         android:clickable="true"
+        android:focusable="auto"
+        android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
@@ -39,6 +40,17 @@
 
         <View
             android:id="@+id/nav_work_divider"
+            style="@style/Divider" />
+
+        <TextView
+            android:id="@+id/nav_mapTesting"
+            android:layout_width="match_parent"
+            android:layout_height="35dp"
+            android:gravity="center_vertical"
+            android:text="@string/mapTest" />
+
+        <View
+            android:id="@+id/nav_map_divider"
             style="@style/Divider" />
 
         <TextView
