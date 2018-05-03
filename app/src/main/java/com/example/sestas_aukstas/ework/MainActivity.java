@@ -110,7 +110,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         startActivity(new Intent(MainActivity.this, LoginActivity.class));
     }
 
-    public void goToMap(){startActivity(new Intent(MainActivity.this, MapActivity.class));}
+    public void goToMap(){startActivity(new Intent(MainActivity.this, TrackingActivity.class));}
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
