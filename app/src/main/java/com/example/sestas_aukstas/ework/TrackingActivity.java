@@ -1,16 +1,19 @@
 package com.example.sestas_aukstas.ework;
 import android.Manifest;
+import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Criteria;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.IBinder;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
@@ -31,7 +34,12 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.PolygonOptions;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 
@@ -51,6 +59,17 @@ public class TrackingActivity extends AppCompatActivity implements
     TextView map_status;
     private GoogleMap mMap;
     Context context = this;
+    Date workTimeStart;
+    Date workTimeStop;
+    Boolean workStarted = false;
+    SimpleDateFormat workDateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    SimpleDateFormat timeFormat = new SimpleDateFormat("hh:mm:ss");
+    long totalWorkTime = 0;
+    private FirebaseAuth mAuth = FirebaseAuth.getInstance();
+    private FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+    int intervalNumber = 1;
+    private int count = 0;
 
 
     @Override
@@ -222,13 +241,112 @@ public class TrackingActivity extends AppCompatActivity implements
             if (pointInPolygon(point, polygon)) {
                 map_status.setText(R.string.inBounds);
                 Log.i("checkIfInBounds", "done checking. In bounds");
+                startWorking();
             } else {
                 map_status.setText(R.string.notInBounds);
                 Log.i("checkIfInBounds", "done checking. Not in bounds");
+                stopWorking();
 
             }
         }
         //else{getDeviceLocation();}
+    }
+
+    public void startWorking(){
+        if(workStarted == false) {
+            count = 0;
+            workStarted = true;
+            workTimeStart = new Date();
+            String datetostr = workDateFormat.format(workTimeStart);
+            String workDate = dateFormat.format(workTimeStart);
+            String workTime = timeFormat.format(workTimeStart);
+            // getCounterIfDateExists(workDate);
+            // resetCounterIfNewDate(workDate);
+            storeDataToDatabase(workDate, workTime, "start");
+            Log.d("start = ", datetostr);
+            Toast.makeText(TrackingActivity.this, "Darbas pradėtas.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public void stopWorking(){
+        count++;
+        if(workStarted == true && count == 10) {
+            workStarted = false;
+            workTimeStop = new Date();
+            String workDate = dateFormat.format(workTimeStop);
+            String workTime = timeFormat.format(workTimeStop);
+            // getCounterIfDateExists(workDate);
+            // resetCounterIfNewDate(workDate);
+            storeDataToDatabase(workDate, workTime, "stop");
+            Log.d("stop = ", workDateFormat.format(workTimeStop));
+            Toast.makeText(TrackingActivity.this, "Darbas baigtas.", Toast.LENGTH_SHORT).show();
+            totalTimeToday();
+        }
+
+    }
+
+    public void stopWorkingOnExit(){
+        //count++;
+        if(workStarted == true) {
+            workStarted = false;
+            workTimeStop = new Date();
+            String workDate = dateFormat.format(workTimeStop);
+            String workTime = timeFormat.format(workTimeStop);
+            // getCounterIfDateExists(workDate);
+            // resetCounterIfNewDate(workDate);
+            storeDataToDatabase(workDate, workTime, "stop");
+            Log.d("stop = ", workDateFormat.format(workTimeStop));
+            Toast.makeText(TrackingActivity.this, "Darbas baigtas.", Toast.LENGTH_SHORT).show();
+            totalTimeToday();
+        }
+
+    }
+
+    public void storeDataToDatabase(String date, String time, String caseOf){
+        //  FirebaseDatabase database = FirebaseDatabase.getInstance();
+        //   mAuth = FirebaseAuth.getInstance();
+        String currentUser = mAuth.getCurrentUser().getUid();
+
+        DatabaseReference ref = firebaseDatabase.getReference();
+        //resetIntervalCounter(date, currentUser, ref);
+
+        // intervalNumber = setIntervalCounter(date, currentUser, ref);
+
+        switch(caseOf){
+            case "start" :
+                ref.child("users").child(currentUser).child("time_stamps").child(date.toString()).child(Integer.toString(intervalNumber)).child("Start").setValue(time);
+                ref.child("users").child(currentUser).child("time_stamps").child(date.toString()).child("interval_counter").setValue(intervalNumber);
+                break;
+            case "stop" :
+                ref.child("users").child(currentUser).child("time_stamps").child(date.toString()).child(Integer.toString(intervalNumber)).child("Stop").setValue(time);
+                intervalNumber++;
+                ref.child("users").child(currentUser).child("time_stamps").child(date.toString()).child("interval_counter").setValue(intervalNumber);
+                // intervalNumber++;
+                break;
+            case "total" :
+                ref.child("users").child(currentUser).child("time_stamps").child(date.toString()).child("Total today").setValue(time);
+                break;
+            default :
+                Toast.makeText(TrackingActivity.this, "Įvyko klaida", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public void totalTimePrint(){
+        long elapsedSeconds = totalWorkTime / 1000 % 60;
+        long elapsedMinutes = totalWorkTime / (60 * 1000) % 60;
+        long elapsedHours = totalWorkTime / (60 * 60 * 1000) % 24;
+        String workDate = dateFormat.format(new Date());
+
+        //  String elapsedTotal = String.format(Long.toString(elapsedHours) + ":" + Long.toString(elapsedMinutes) + ":" + Long.toString(elapsedSeconds));
+        String elapsedTotal = String.format("%02d:%02d:%02d", elapsedHours, elapsedMinutes, elapsedSeconds);
+        storeDataToDatabase(workDate, elapsedTotal, "total");
+    }
+
+    public void totalTimeToday(){
+        //milliseconds
+        long difference = workTimeStop.getTime() - workTimeStart.getTime();
+        totalWorkTime+=difference;
+        totalTimePrint();
     }
 
 
@@ -478,6 +596,7 @@ public class TrackingActivity extends AppCompatActivity implements
 
         stopService(new Intent(this, LocationMonitoringService.class));
         mAlreadyStartedService = false;
+        stopWorkingOnExit();
         //Ends................................................
 
 
