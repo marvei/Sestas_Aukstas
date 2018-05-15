@@ -1,5 +1,6 @@
 package com.example.sestas_aukstas.ework;
 
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -8,17 +9,22 @@ import android.net.NetworkInfo;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.android.gms.common.GoogleApiAvailability;
+
+
 
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
     TextView tvRegister;
@@ -26,16 +32,35 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     EditText usrPass;
     Button btnLogin;
     FirebaseAuth mAuth;
+    private static final int ERROR_DIALOG_REQUEST = 9001;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login_page);
-        initializeObj();
-
+        if(isServicesOK()){
+            initializeObj();
+        }
         tvRegister.setOnClickListener(this);
         btnLogin.setOnClickListener(this);
 
+    }
+
+    public boolean isServicesOK(){
+        int available = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this);
+        if(available == ConnectionResult.SUCCESS){
+            Log.d("LoginActivity", "isServicesOK: Google Play Services are working");
+            return true;
+        }
+        else if(GoogleApiAvailability.getInstance().isUserResolvableError(available)){
+            Log.d("LoginActivity", "isServicesOK: an error occured but we can fix it");
+            Dialog dialog = GoogleApiAvailability.getInstance().getErrorDialog(this, available, ERROR_DIALOG_REQUEST);
+            dialog.show();
+        }
+        else{
+            Toast.makeText(LoginActivity.this, "Google Services are too old.", Toast.LENGTH_SHORT).show();
+        }
+        return false;
     }
 
     public void initializeObj() {

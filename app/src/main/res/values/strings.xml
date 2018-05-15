@@ -20,6 +20,7 @@
     <string name="darbas">Darbas</string>
     <string name="settings">Nustatymai</string>
     <string name="logout">Atsijungti</string>
+    <string name="mapTest">MapTesting</string>
 
     //profile_page
     <string name="profileLogout">Atsijungti</string>
@@ -42,7 +43,24 @@
     <string name="profileEmailUpdate">El. Paštas</string>
     <string name="profileUpdateHeader">Porfilio redagavimas</string>
 
+    //activity_map
+    <string name="inBounds">Ribose</string>
+    <string name="notInBounds">Už ribų</string>
+    <string name="Cancel">Atšaukti</string>
+    <string name="open_location_settings">Atidaryti nustatymus</string>
+    <string name="gps_network_not_enabled">GPS išjungtas</string>
+
+
+
     //error text
     <string name="emptyFieldMsg">Laukelis negali būti tūščias.</string>
+    <string name="permission_rationale">Please grant location permission to start the service</string>
+    <string name="permission_denied_explanation">You have not granted location permission. So the service cannot be started.</string>
+    <string name="title_alert_no_intenet">No internet</string>
+    <string name="msg_alert_no_internet">Please make sure that you have active internet connection.</string>
+    <string name="no_google_playservice_available">No Google Playservice found. Please install it.</string>
+    <string name="msg_location_service_not_started">Location Tracking Not Started</string>
+    <string name="msg_location_service_started">Location Tracking Started</string>
+    <string name="btn_label_refresh">Refresh</string>
 
 </resources>
