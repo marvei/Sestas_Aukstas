@@ -13,6 +13,7 @@ import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Handler;
 import android.os.IBinder;
 import android.provider.ContactsContract;
 import android.provider.Settings;
@@ -72,20 +73,28 @@ public class TrackingActivity extends AppCompatActivity implements
     long totalWorkTime = 0;
     private FirebaseAuth mAuth = FirebaseAuth.getInstance();
     private FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
-    int intervalNumber;
+    int intervalNumber = 1;
+
+    // int intervalas;
     private int count = 0;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        checkLocationServices();
+        getIntervalOnStart();
+
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                checkLocationServices();
+            }
+        }, 5000);
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tracking);
         mMsgView = findViewById(R.id.msgView);
         map_status = findViewById(R.id.map_status);
-
-
-
 
         LocalBroadcastManager.getInstance(this).registerReceiver(
                 new BroadcastReceiver() {
@@ -96,7 +105,6 @@ public class TrackingActivity extends AppCompatActivity implements
 
 
                         if (latitude != null && longitude != null) {
-                            isDateNew();
                             Double lat = Double.valueOf(latitude);
                             Double lon = Double.valueOf(longitude);
                             mMsgView.setText(getString(R.string.msg_location_service_started) + "\n Latitude : " + latitude + "\n Longitude: " + longitude);
@@ -277,7 +285,6 @@ public class TrackingActivity extends AppCompatActivity implements
     }
 
     public void stopWorking(){
-        count++;
         if(workStarted == true && count == 10) {
             workStarted = false;
             workTimeStop = new Date();
@@ -290,7 +297,7 @@ public class TrackingActivity extends AppCompatActivity implements
             Toast.makeText(TrackingActivity.this, "Darbas baigtas.", Toast.LENGTH_SHORT).show();
             totalTimeToday();
         }
-
+        count++;
     }
 
     public void stopWorkingOnExit(){
@@ -322,13 +329,17 @@ public class TrackingActivity extends AppCompatActivity implements
 
         switch(caseOf){
             case "start" :
+                //getIntervals(currentUser, date);
+                ref.child("users").child(currentUser).child("time_stamps").child(date.toString()).child("interval_counter").setValue(intervalNumber);
                 ref.child("users").child(currentUser).child("time_stamps").child(date.toString()).child(Integer.toString(intervalNumber)).child("Start").setValue(time);
+//                ref.child("users").child(currentUser).child("time_stamps").child(date.toString()).child("interval_counter").setValue(intervalNumber);
+//                ref.child("users").child(currentUser).child("time_stamps").child(date.toString()).child("Total today").setValue(time);
+                //getIntervals(currentUser, date);
                 break;
             case "stop" :
                 ref.child("users").child(currentUser).child("time_stamps").child(date.toString()).child(Integer.toString(intervalNumber)).child("Stop").setValue(time);
+                //intervalNumber++;
                 intervalNumber++;
-                ref.child("users").child(currentUser).child("time_stamps").child(date.toString()).child("interval_counter").setValue(intervalNumber);
-                // intervalNumber++;
                 break;
             case "total" :
                 ref.child("users").child(currentUser).child("time_stamps").child(date.toString()).child("Total today").setValue(time);
@@ -336,6 +347,54 @@ public class TrackingActivity extends AppCompatActivity implements
             default :
                 Toast.makeText(TrackingActivity.this, "Įvyko klaida", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    public void getIntervals(String currentUser, String date){
+        DatabaseReference ref = firebaseDatabase.getReference();
+        DatabaseReference inter = ref.child("users").child(currentUser).child("time_stamps").child(date.toString());
+        ValueEventListener eventListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                long x = dataSnapshot.getChildrenCount();
+                if((x - 2) >= 1){
+                    intervalNumber = (int) (x-1);
+                }
+                Log.i("database", Integer.toString(intervalNumber));
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {}
+        };
+        inter.addListenerForSingleValueEvent(eventListener);
+    }
+
+    public void getIntervalOnStart(){
+        String currentUser = mAuth.getCurrentUser().getUid();
+        Date curDate = new Date();
+        final Integer[] a = {1};
+        String date = dateFormat.format(curDate);
+        DatabaseReference ref = firebaseDatabase.getReference();
+        DatabaseReference inter = ref.child("users").child(currentUser).child("time_stamps").child(date.toString());
+        ValueEventListener eventListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                long x = dataSnapshot.getChildrenCount();
+                Integer b = (int) (x);
+                if(b >= 3){
+                    a[0] = (int) (x-1);
+
+                    Log.i("database", Integer.toString(a[0]));
+                }
+                else if(b < 3) a[0] = 1;
+                Log.i("database", Integer.toString(a[0]));
+
+                intervalNumber = a[0];
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {}
+        };
+        inter.addListenerForSingleValueEvent(eventListener);
     }
 
     public void totalTimePrint(){
@@ -394,7 +453,7 @@ public class TrackingActivity extends AppCompatActivity implements
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 intervalNumber = dataSnapshot.child("interval_counter").getValue(Integer.class);
-               // intervalNumber = Integer.valueOf(dataSnapshot.getKey());
+                // intervalNumber = Integer.valueOf(dataSnapshot.getKey());
                 Log.d("counter ", String.valueOf(intervalNumber));
             }
 
@@ -688,10 +747,10 @@ public class TrackingActivity extends AppCompatActivity implements
 
 
         //Stop location sharing service to app server.........
-
+        stopWorkingOnExit();
         stopService(new Intent(this, LocationMonitoringService.class));
         mAlreadyStartedService = false;
-        stopWorkingOnExit();
+
         //Ends................................................
 
 
