@@ -83,7 +83,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     SimpleDateFormat workDateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     SimpleDateFormat timeFormat = new SimpleDateFormat("hh:mm:ss");
-    SimpleDateFormat timePraejo = new SimpleDateFormat("hh:mm:ss");;
     long totalWorkTime = 0;
     private FirebaseAuth mAuth = FirebaseAuth.getInstance();
     private FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
@@ -94,7 +93,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
+        checkLocationServices();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_page);
         initializeObj();
@@ -464,7 +463,38 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 long x = dataSnapshot.getChildrenCount();
                 Integer b = (int) (x);
                 if(b >= 3){
-                    a[0] = (int) (x-1);
+                    if(workStarted == false){
+                        a[0] = (int) (x-1);
+                    }
+                    else a[0] = (int) (x-2);
+                    Log.i("database", Integer.toString(a[0]));
+                }
+                else if(b < 3) a[0] = 1;
+                Log.i("database", Integer.toString(a[0]));
+
+                intervalNumber = a[0];
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {}
+        };
+        inter.addListenerForSingleValueEvent(eventListener);
+    }
+
+    public void getIntervalOnStop(){
+        String currentUser = mAuth.getCurrentUser().getUid();
+        Date curDate = new Date();
+        final Integer[] a = {1};
+        String date = dateFormat.format(curDate);
+        DatabaseReference ref = firebaseDatabase.getReference();
+        DatabaseReference inter = ref.child("users").child(currentUser).child("time_stamps").child(date.toString());
+        ValueEventListener eventListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                long x = dataSnapshot.getChildrenCount();
+                Integer b = (int) (x);
+                if(b >= 3){
+                    a[0] = (int) (x-2);
 
                     Log.i("database", Integer.toString(a[0]));
                 }
