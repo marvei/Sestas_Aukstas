@@ -13,7 +13,9 @@ import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Handler;
 import android.os.IBinder;
+import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
@@ -35,8 +37,11 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.PolygonOptions;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -69,17 +74,27 @@ public class TrackingActivity extends AppCompatActivity implements
     private FirebaseAuth mAuth = FirebaseAuth.getInstance();
     private FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
     int intervalNumber = 1;
+
+    // int intervalas;
     private int count = 0;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        checkLocationServices();
+        getIntervalOnStart();
+
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                checkLocationServices();
+            }
+        }, 5000);
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tracking);
         mMsgView = findViewById(R.id.msgView);
         map_status = findViewById(R.id.map_status);
-
 
         LocalBroadcastManager.getInstance(this).registerReceiver(
                 new BroadcastReceiver() {
@@ -100,6 +115,7 @@ public class TrackingActivity extends AppCompatActivity implements
                 }, new IntentFilter(LocationMonitoringService.ACTION_LOCATION_BROADCAST)
         );
     }
+
 
     private void checkLocationServices() {
         LocationManager lm = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
@@ -269,7 +285,6 @@ public class TrackingActivity extends AppCompatActivity implements
     }
 
     public void stopWorking(){
-        count++;
         if(workStarted == true && count == 10) {
             workStarted = false;
             workTimeStop = new Date();
@@ -282,7 +297,7 @@ public class TrackingActivity extends AppCompatActivity implements
             Toast.makeText(TrackingActivity.this, "Darbas baigtas.", Toast.LENGTH_SHORT).show();
             totalTimeToday();
         }
-
+        count++;
     }
 
     public void stopWorkingOnExit(){
@@ -314,14 +329,17 @@ public class TrackingActivity extends AppCompatActivity implements
 
         switch(caseOf){
             case "start" :
-                ref.child("users").child(currentUser).child("time_stamps").child(date.toString()).child(Integer.toString(intervalNumber)).child("Start").setValue(time);
+                //getIntervals(currentUser, date);
                 ref.child("users").child(currentUser).child("time_stamps").child(date.toString()).child("interval_counter").setValue(intervalNumber);
+                ref.child("users").child(currentUser).child("time_stamps").child(date.toString()).child(Integer.toString(intervalNumber)).child("Start").setValue(time);
+//                ref.child("users").child(currentUser).child("time_stamps").child(date.toString()).child("interval_counter").setValue(intervalNumber);
+//                ref.child("users").child(currentUser).child("time_stamps").child(date.toString()).child("Total today").setValue(time);
+                //getIntervals(currentUser, date);
                 break;
             case "stop" :
                 ref.child("users").child(currentUser).child("time_stamps").child(date.toString()).child(Integer.toString(intervalNumber)).child("Stop").setValue(time);
+                //intervalNumber++;
                 intervalNumber++;
-                ref.child("users").child(currentUser).child("time_stamps").child(date.toString()).child("interval_counter").setValue(intervalNumber);
-                // intervalNumber++;
                 break;
             case "total" :
                 ref.child("users").child(currentUser).child("time_stamps").child(date.toString()).child("Total today").setValue(time);
@@ -329,6 +347,54 @@ public class TrackingActivity extends AppCompatActivity implements
             default :
                 Toast.makeText(TrackingActivity.this, "Įvyko klaida", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    public void getIntervals(String currentUser, String date){
+        DatabaseReference ref = firebaseDatabase.getReference();
+        DatabaseReference inter = ref.child("users").child(currentUser).child("time_stamps").child(date.toString());
+        ValueEventListener eventListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                long x = dataSnapshot.getChildrenCount();
+                if((x - 2) >= 1){
+                    intervalNumber = (int) (x-1);
+                }
+                Log.i("database", Integer.toString(intervalNumber));
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {}
+        };
+        inter.addListenerForSingleValueEvent(eventListener);
+    }
+
+    public void getIntervalOnStart(){
+        String currentUser = mAuth.getCurrentUser().getUid();
+        Date curDate = new Date();
+        final Integer[] a = {1};
+        String date = dateFormat.format(curDate);
+        DatabaseReference ref = firebaseDatabase.getReference();
+        DatabaseReference inter = ref.child("users").child(currentUser).child("time_stamps").child(date.toString());
+        ValueEventListener eventListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                long x = dataSnapshot.getChildrenCount();
+                Integer b = (int) (x);
+                if(b >= 3){
+                    a[0] = (int) (x-1);
+
+                    Log.i("database", Integer.toString(a[0]));
+                }
+                else if(b < 3) a[0] = 1;
+                Log.i("database", Integer.toString(a[0]));
+
+                intervalNumber = a[0];
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {}
+        };
+        inter.addListenerForSingleValueEvent(eventListener);
     }
 
     public void totalTimePrint(){
@@ -348,6 +414,94 @@ public class TrackingActivity extends AppCompatActivity implements
         totalWorkTime+=difference;
         totalTimePrint();
     }
+
+    public void isDateNew(){
+        DatabaseReference ref = firebaseDatabase.getReference().child("users").child(mAuth.getUid()).child("time_stamps");
+        ref.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (!dataSnapshot.hasChild(dateFormat.format(new Date()).toString())){
+                    //setIntervalNumber();
+                    setNewDate(dateFormat.format(new Date()).toString());
+                } else getIntervalNumber(dateFormat.format(new Date()).toString());
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.d("error", "unable to connect to database");
+            }
+        });
+    }
+
+
+    public void setNewDate(String date){
+        DatabaseReference ref = firebaseDatabase.getReference().child("users").child(mAuth.getUid()).child("time_stamps");
+        ref.child(date);
+        setIntervalNumber(1, date);
+
+    }
+
+    public void setIntervalNumber(int counter, String date){
+        DatabaseReference ref = firebaseDatabase.getReference().child("users").child(mAuth.getUid()).child("time_stamps").child(date.toString()).child("interval_counter");
+        //ref.child(String.valueOf(counter));
+        ref.setValue(counter);
+    }
+
+    public void getIntervalNumber(String date){
+        DatabaseReference ref = firebaseDatabase.getReference().child("users").child(mAuth.getUid()).child("time_stamps").child(date.toString());//.child("interval_counter");
+        ref.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                intervalNumber = dataSnapshot.child("interval_counter").getValue(Integer.class);
+                // intervalNumber = Integer.valueOf(dataSnapshot.getKey());
+                Log.d("counter ", String.valueOf(intervalNumber));
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.d("error", "unable to retreive interval counter from the database");
+            }
+        });
+    }
+
+
+
+
+
+//    private Integer setIntervalCounter(String date, String user, DatabaseReference reference) {
+//        reference = reference.child("users").child(user).child("time_stamps");
+//        final DatabaseReference finalReference = reference;
+//        final String finalDate = date;
+//        Log.d("final date - ", finalDate);
+//        reference.addListenerForSingleValueEvent(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(DataSnapshot dataSnapshot) {
+//                if (dataSnapshot.hasChild(finalDate)){
+//                    DatabaseReference dateRef = finalReference.child(finalDate).child("interval_counter");
+//                    dateRef.addListenerForSingleValueEvent(new ValueEventListener() {
+//                        @Override
+//                        public void onDataChange(DataSnapshot dataSnapshot) {
+//                            intervalNumber = dataSnapshot.getValue(Integer.class);
+//                        }
+//
+//                        @Override
+//                        public void onCancelled(DatabaseError databaseError) {
+//                            Log.d("counter - ", Integer.toString(intervalNumber));
+//                        }
+//                    });
+//                } else {
+//                    intervalNumber = 1;
+//                }
+//            }
+//
+//            @Override
+//            public void onCancelled(DatabaseError databaseError) {
+//                Log.d("Same date - ", finalDate);
+//            }
+//        });
+//        return intervalNumber;
+//    }
+
 
 
     /**
@@ -593,10 +747,10 @@ public class TrackingActivity extends AppCompatActivity implements
 
 
         //Stop location sharing service to app server.........
-
+        stopWorkingOnExit();
         stopService(new Intent(this, LocationMonitoringService.class));
         mAlreadyStartedService = false;
-        stopWorkingOnExit();
+
         //Ends................................................
 
 
