@@ -93,16 +93,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-//        getIntervalOnStart();
-//
-//        final Handler handler = new Handler();
-//        handler.postDelayed(new Runnable() {
-//            @Override
-//            public void run() {
-//                checkLocationServices();
-//            }
-//        }, 10000);
-
+        checkLocationServices();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_page);
         initializeObj();
@@ -352,7 +343,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
     public void checkIfCurrentLocationInBounds(Double latitude, Double longitude) {
-
         if(latitude != null && longitude != null && mMap != null) {
             Log.i("called", "checking");
             LatLng point = new LatLng(latitude, longitude);
@@ -438,6 +428,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         switch(caseOf){
             case "start" :
                 //getIntervals(currentUser, date);
+                getTotalTimeInMillis();
                 ref.child("users").child(currentUser).child("time_stamps").child(date.toString()).child("interval_counter").setValue(intervalNumber);
                 ref.child("users").child(currentUser).child("time_stamps").child(date.toString()).child(Integer.toString(intervalNumber)).child("Start").setValue(time);
 //                ref.child("users").child(currentUser).child("time_stamps").child(date.toString()).child("interval_counter").setValue(intervalNumber);
@@ -446,10 +437,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case "stop" :
                 ref.child("users").child(currentUser).child("time_stamps").child(date.toString()).child(Integer.toString(intervalNumber)).child("Stop").setValue(time);
+                ref.child("users").child(currentUser).child("time_stamps").child(date.toString()).child(Integer.toString(intervalNumber)).child("TotalInMillis").setValue(totalTimeStop());
                 //intervalNumber++;
                 intervalNumber++;
                 break;
             case "total" :
+
                 ref.child("users").child(currentUser).child("time_stamps").child(date.toString()).child("Total today").setValue(time);
                 break;
             default :
@@ -470,7 +463,38 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 long x = dataSnapshot.getChildrenCount();
                 Integer b = (int) (x);
                 if(b >= 3){
-                    a[0] = (int) (x-1);
+                    if(workStarted == false){
+                        a[0] = (int) (x-1);
+                    }
+                    else a[0] = (int) (x-2);
+                    Log.i("database", Integer.toString(a[0]));
+                }
+                else if(b < 3) a[0] = 1;
+                Log.i("database", Integer.toString(a[0]));
+
+                intervalNumber = a[0];
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {}
+        };
+        inter.addListenerForSingleValueEvent(eventListener);
+    }
+
+    public void getIntervalOnStop(){
+        String currentUser = mAuth.getCurrentUser().getUid();
+        Date curDate = new Date();
+        final Integer[] a = {1};
+        String date = dateFormat.format(curDate);
+        DatabaseReference ref = firebaseDatabase.getReference();
+        DatabaseReference inter = ref.child("users").child(currentUser).child("time_stamps").child(date.toString());
+        ValueEventListener eventListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                long x = dataSnapshot.getChildrenCount();
+                Integer b = (int) (x);
+                if(b >= 3){
+                    a[0] = (int) (x-2);
 
                     Log.i("database", Integer.toString(a[0]));
                 }
@@ -486,22 +510,58 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         inter.addListenerForSingleValueEvent(eventListener);
     }
 
-    public void totalTimePrint(){
-        long elapsedSeconds = totalWorkTime / 1000 % 60;
-        long elapsedMinutes = totalWorkTime / (60 * 1000) % 60;
-        long elapsedHours = totalWorkTime / (60 * 60 * 1000) % 24;
-        String workDate = dateFormat.format(new Date());
+    public void getTotalTimeInMillis(){
+        final String currentUser = mAuth.getCurrentUser().getUid();
+        final DatabaseReference ref = firebaseDatabase.getReference();
+        Date curDate = new Date();
+        String date = dateFormat.format(curDate);
+        totalWorkTime = 0;
 
-        //  String elapsedTotal = String.format(Long.toString(elapsedHours) + ":" + Long.toString(elapsedMinutes) + ":" + Long.toString(elapsedSeconds));
-        String elapsedTotal = String.format("%02d:%02d:%02d", elapsedHours, elapsedMinutes, elapsedSeconds);
-        storeDataToDatabase(workDate, elapsedTotal, "total");
+        for(int i = 1; i <= intervalNumber; i++) {
+            DatabaseReference inter = ref.child("users").child(currentUser).child("time_stamps").child(date.toString()).child(Integer.toString(i)).child("TotalInMillis");
+            ValueEventListener eventListener = new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    if(dataSnapshot.getValue() != null){
+                        long x = (long) dataSnapshot.getValue();
+                        totalWorkTime+=x;
+                        Log.i("database", Long.toString(x));
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {}
+            };
+            inter.addListenerForSingleValueEvent(eventListener);
+        }
+    }
+
+    public void totalTimePrint(){
+        final String workDate = dateFormat.format(new Date());
+                long elapsedSeconds = totalWorkTime / 1000 % 60;
+                long elapsedMinutes = totalWorkTime / (60 * 1000) % 60;
+                long elapsedHours = totalWorkTime / (60 * 60 * 1000) % 24;
+                //String workDate = dateFormat.format(new Date());
+
+                //  String elapsedTotal = String.format(Long.toString(elapsedHours) + ":" + Long.toString(elapsedMinutes) + ":" + Long.toString(elapsedSeconds));
+                String elapsedTotal = String.format("%02d:%02d:%02d", elapsedHours, elapsedMinutes, elapsedSeconds);
+                storeDataToDatabase(workDate, elapsedTotal, "total");
+
     }
 
     public void totalTimeToday(){
+
+
+
         //milliseconds
         long difference = workTimeStop.getTime() - workTimeStart.getTime();
         totalWorkTime+=difference;
         totalTimePrint();
+    }
+
+    public long totalTimeStop(){
+        long difference = workTimeStop.getTime() - workTimeStart.getTime();
+        return difference;
     }
 
     /**
@@ -758,6 +818,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         //Stop location sharing service to app server.........
         stopWorkingOnExit();
+        totalTimePrint();
         stopService(new Intent(this, LocationMonitoringService.class));
         mAlreadyStartedService = false;
 
