@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -41,8 +42,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         if(isServicesOK()){
             initializeObj();
         }
-        tvRegister.setOnClickListener(this);
-        btnLogin.setOnClickListener(this);
+
 
     }
 
@@ -69,6 +69,9 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         btnLogin = findViewById(R.id.btnLogin);
         tvRegister = findViewById(R.id.tvRegister);
         mAuth = FirebaseAuth.getInstance();
+        tvRegister.setOnClickListener(this);
+        btnLogin.setOnClickListener(this);
+
     }
 
     public boolean noEmptyFields(){

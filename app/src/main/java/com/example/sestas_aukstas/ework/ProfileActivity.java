@@ -185,12 +185,26 @@ public class ProfileActivity extends AppCompatActivity implements View.OnClickLi
         long elapsedHours = totalWorkT / (60 * 60 * 1000) % 24;
         //String workDate = dateFormat.format(new Date());
 
+        String currentUser = mAuth.getCurrentUser().getUid();
+        DatabaseReference ref = firebaseDatabase.getReference();
+        final String date = dateFormat.format(new Date());
         //  String elapsedTotal = String.format(Long.toString(elapsedHours) + ":" + Long.toString(elapsedMinutes) + ":" + Long.toString(elapsedSeconds));
         Log.i("PRINTAS", Long.toString(totalWorkT));
         String elapsedTotal = String.format("%02d:%02d:%02d", elapsedHours, elapsedMinutes, elapsedSeconds);
+
+
         tvTimeTotal = findViewById(R.id.tvTotal);
         tvTimeTotal.setText(elapsedTotal);
         tvTimeTotal.setVisibility(View.VISIBLE);
+
+        String elapsedH = Long.toString(elapsedHours);
+        String elapsedM = Long.toString(elapsedMinutes);
+        String elapsedS = Long.toString(elapsedSeconds);
+        //elapsedH = String.format("%02d", elapsedH);
+        //elapsedM = String.format("%02d", elapsedM);
+        //elapsedS = String.format("%02d", elapsedS);
+        String elapsed = elapsedH + ":" + elapsedM + ":" + elapsedS;
+        ref.child("users").child(currentUser).child("time_stamps").child(date.toString()).child("Total today").setValue(elapsed);
 
     }
 

@@ -464,8 +464,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 long x = dataSnapshot.getChildrenCount();
                 Integer b = (int) (x);
                 if(b >= 3){
-                    if(workStarted == false){
-                        a[0] = (int) (x-1);
+                    if(workStarted == false) {
+                        a[0] = (int) (x - 1);
                     }
                     else a[0] = (int) (x-2);
                     Log.i("database", Integer.toString(a[0]));
@@ -539,13 +539,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     public void totalTimePrint(){
         final String workDate = dateFormat.format(new Date());
-                long elapsedSeconds = totalWorkTime / 1000 % 60;
-                long elapsedMinutes = totalWorkTime / (60 * 1000) % 60;
-                long elapsedHours = totalWorkTime / (60 * 60 * 1000) % 24;
+                String elapsedSeconds = Long.toString(totalWorkTime / 1000 % 60);
+                String elapsedMinutes = Long.toString(totalWorkTime / (60 * 1000) % 60);
+                String elapsedHours = Long.toString(totalWorkTime / (60 * 60 * 1000) % 24);
+                //elapsedHours = String.format("%02d", elapsedHours);
                 //String workDate = dateFormat.format(new Date());
 
                 //  String elapsedTotal = String.format(Long.toString(elapsedHours) + ":" + Long.toString(elapsedMinutes) + ":" + Long.toString(elapsedSeconds));
-                String elapsedTotal = String.format("%02d:%02d:%02d", elapsedHours, elapsedMinutes, elapsedSeconds);
+                //String elapsedTotal = String.format("%02d:%02d:%02d", elapsedHours, elapsedMinutes, elapsedSeconds);
+                String elapsedTotal = elapsedHours + ":" + elapsedMinutes + ":" + elapsedSeconds;
                 storeDataToDatabase(workDate, elapsedTotal, "total");
 
     }
