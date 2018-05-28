@@ -55,15 +55,45 @@
         app:layout_constraintStart_toEndOf="@+id/ivProfilePic"
         app:layout_constraintTop_toBottomOf="@+id/tvProfileName" />
 
-    <Button
-        android:id="@+id/btnWorkStat"
+    <TextView
+        android:id="@+id/tvTextTotal"
+        android:layout_width="269dp"
+        android:layout_height="41dp"
+        android:layout_marginTop="8dp"
+        android:text="Šiandien pradirbta:"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/guideline6"
+        tools:textSize="30sp" />
+
+    <android.support.constraint.Guideline
+        android:id="@+id/guideline6"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="11dp"
-        android:layout_marginStart="11dp"
-        android:layout_marginTop="140dp"
-        android:text="@string/profileWorkStat"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_begin="155dp" />
+
+    <TextView
+        android:id="@+id/tvTotal"
+        android:layout_width="271dp"
+        android:layout_height="46dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginTop="8dp"
+        android:text="laukiama iš duombazės"
+        app:layout_constraintBottom_toTopOf="@+id/guideline8"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/tvTextTotal"
+        tools:textSize="18sp" />
+
+    <android.support.constraint.Guideline
+        android:id="@+id/guideline8"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_begin="278dp" />
 
 </android.support.constraint.ConstraintLayout>

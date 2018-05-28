@@ -86,7 +86,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     long totalWorkTime = 0;
     private FirebaseAuth mAuth = FirebaseAuth.getInstance();
     private FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
-    int intervalNumber = 1;
+    public int intervalNumber = 1;
 
     // int intervalas;
     private int count = 0;
@@ -182,6 +182,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // finish();
         //  firebaseObj.signOut();
         Toast.makeText(MainActivity.this, "Sėkmingai atsijungta", Toast.LENGTH_SHORT).show();
+        stopWorkingOnExit();
         startActivity(new Intent(MainActivity.this, LoginActivity.class));
     }
 

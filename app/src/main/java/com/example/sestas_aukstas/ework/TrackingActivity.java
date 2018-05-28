@@ -257,11 +257,11 @@ public class TrackingActivity extends AppCompatActivity implements
             if (pointInPolygon(point, polygon)) {
                 map_status.setText(R.string.inBounds);
                 Log.i("checkIfInBounds", "done checking. In bounds");
-                startWorking();
+              //  startWorking();
             } else {
                 map_status.setText(R.string.notInBounds);
                 Log.i("checkIfInBounds", "done checking. Not in bounds");
-                stopWorking();
+               // stopWorking();
 
             }
         }
